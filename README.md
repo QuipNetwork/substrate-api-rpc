@@ -15,6 +15,34 @@
 go get github.com/itering/substrate-api-rpc
 ```
 
+### Quip fork dependency pin
+
+This fork retains the `github.com/itering/substrate-api-rpc` module identity.
+Its decoder replacement retains the `github.com/itering/scale.go` import path and
+resolves to `github.com/QuipNetwork/scale.go` at reviewed commit
+`520629284934adca438e53c05fc1bce75a876e79`, represented by Go pseudo-version
+`v0.0.0-20261014234944-520629284934`. The module checksums are committed in
+`go.sum`; a local checkout or Docker decoder patch is not required.
+
+The decoder requires Go 1.24 or newer, so this module declares Go 1.24.0.
+Its dependency graph also selects `golang.org/x/crypto v0.45.0` and
+`golang.org/x/sys v0.38.0`. These are inherited from the pinned decoder.
+
+Go ignores dependency modules' `replace` directives. A consuming main module
+must therefore carry this same decoder replacement as well as its RPC fork pin;
+pinning only this RPC fork does not select the Quip decoder transitively.
+
+Offline unit checks (after dependencies have been downloaded):
+
+```sh
+go test -mod=readonly . ./keyring ./util/...
+go build -mod=readonly ./...
+go vet -mod=readonly ./...
+```
+
+The `rpc` package's existing transaction tests initialize a public RPC connection
+and submit transactions. Do not include them in the offline unit command above.
+
 ## Usage
 
 ### Codec
